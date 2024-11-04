@@ -1,0 +1,533 @@
+------------------------------------------------>> VTP on SW 1,2,3:
+en
+conf t
+
+int range f0/23-24 , g0/1-2
+swi mode tru
+vtp mode client
+vtp domain network
+
+
+------------------------------------------------>> VTP on MSW 1,2:
+en
+conf t
+
+int range g1/0/1-6
+swi mode tru
+vtp mode server
+vtp version 2
+vtp domain network
+
+------------------------------------------------>> VLANS
+MSW 1 or 2
+vlan 10
+name HR
+vlan 20
+name Sales
+vlan 30
+name Management
+vlan 40
+name Engineering
+vlan 50
+name Printers
+vlan 100 
+name IT
+vlan 200
+name Guests
+------------------------------------------------>> EtherChannel on MSW1, MSW2
+
+interface port-channel 1
+switchport mode trunk
+exit
+interface range GigabitEthernet1/0/1-2
+channel-group 1 mode active
+exit
+
+interface port-channel 2
+switchport mode trunk
+exit
+interface range GigabitEthernet1/0/3-4
+channel-group 2 mode active
+exit
+
+interface port-channel 3
+switchport mode trunk
+exit
+interface range GigabitEthernet1/0/5-6
+channel-group 3 mode active
+exit
+
+interface port-channel 4
+switchport mode trunk
+exit
+interface range GigabitEthernet1/0/10-13
+channel-group 4 mode active
+exit
+
+
+interface port-channel 5
+no switchport
+exit
+interface range GigabitEthernet1/0/7-8
+no switchport
+channel-group 5 mode on
+exit
+
+----------------------------------------------------->> STP on MSW1
+
+spanning-tree vlan 10,30,40,50 root pri 
+spanning-tree vlan 200,20,100 root sec
+
+----------------------------------------------------->> STP on MSW
+spanning-tree vlan 10,30,40,50 root sec 
+spanning-tree vlan 200,20,100 root pri
+
+
+---------------------------------------------------->>EtherChannel on SW1,2,3
+interface port-channel 1
+switchport mode trunk
+exit
+interface range GigabitEthernet0/1, f0/23
+channel-group 1 mode active
+exit
+
+interface port-channel 2
+switchport mode trunk
+exit
+interface range GigabitEthernet0/2, f0/24
+channel-group 2 mode active
+exit
+
+----------------------------------------------------->>EtherChannel on Firewall
+interface port-channel 1
+exit
+interface GigabitEthernet1/1
+channel-group 1 mode on
+interface GigabitEthernet1/2
+channel-group 1 mode on
+exit
+interface port-channel 2
+exit
+interface range GigabitEthernet1/3
+channel-group 2 mode on
+interface range GigabitEthernet1/3
+channel-group 2 mode on
+exit
+
+
+
+
+---------------------------------------------->> basic access switches configurations
+
+---------------------------------------->> SW1
+interface range fastethernet 0/1-8
+switchport mode access
+switch access vlan 10
+switchport port-security 
+switchport port-security mac-address sticky
+switchport port-security violation protect
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+interface range fastethernet 0/9-10
+switchport mode access
+switch access vlan 40
+switchport port-security 
+switchport port-security mac-address sticky
+switchport port-security violation protect
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+---------------------------------------->> SW3
+interface range fastethernet 0/5-10
+switchport mode access
+switch access vlan 40
+switchport port-security 
+switchport port-security mac-address sticky
+switchport port-security violation protect
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+
+interface range fastethernet 0/1-5
+switchport mode access
+switch access vlan 30
+switchport port-security 
+switchport port-security mac-address sticky
+switchport port-security violation protect
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+---------------------------------->> ALL
+interface fastethernet 0/11
+switchport mode access
+switch access vlan 50
+switchport port-security 
+switchport port-security mac-address sticky
+switchport port-security violation protect
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+
+interface fastethernet 0/12
+switchport mode access
+switch access vlan 200
+switchport port-security 
+switchport port-security mac-address sticky
+switchport port-security violation protect
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+------------------------------->> SW2
+interface range fastethernet 0/1-4
+switchport mode access
+switch access vlan 200
+switchport port-security 
+switchport port-security mac-address sticky
+switchport port-security violation protect
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+interface range fastethernet 0/5-10
+switchport mode access
+switch access vlan 20
+switchport port-security 
+switchport port-security mac-address sticky
+switchport port-security violation protect
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+
+----------------------------------------->>SVIs and DHCP relay
+------------------------------------->> MSW1
+interface vlan 10
+ip address 192.168.0.1 255.255.255.224
+ip helper-address 192.168.0.132
+
+interface vlan 40
+ip address 192.168.0.33 255.255.255.224  
+ip helper-address 192.168.0.132
+
+interface vlan 200
+ip address 192.168.0.65 255.255.255.240  
+ip helper-address 192.168.0.132
+
+interface vlan 20
+ip address 192.168.0.81 255.255.255.240  
+ip helper-address 192.168.0.132
+
+interface vlan 50
+ip address 192.168.0.97 255.255.255.240  
+ip helper-address 192.168.0.132
+
+interface vlan 30
+ip address 192.168.0.113 255.255.255.240 
+ip helper-address 192.168.0.132
+
+interface vlan 60
+ip address 192.168.0.129 255.255.255.240 
+ip helper-address 192.168.0.132
+
+
+------------------------------------->> MSW2
+interface vlan 10
+ip address 192.168.0.2 255.255.255.224
+ip helper-address 192.168.0.132
+
+interface vlan 40
+ip address 192.168.0.34 255.255.255.224  
+ip helper-address 192.168.0.132
+
+interface vlan 200
+ip address 192.168.0.66 255.255.255.240  
+ip helper-address 192.168.0.132
+
+interface vlan 20
+ip address 192.168.0.82 255.255.255.240  
+ip helper-address 192.168.0.132
+
+interface vlan 50
+ip address 192.168.0.98 255.255.255.240  
+ip helper-address 192.168.0.132
+
+interface vlan 30
+ip address 192.168.0.114 255.255.255.240 
+ip helper-address 192.168.0.132
+
+interface vlan 60
+ip address 192.168.0.130 255.255.255.240 
+ip helper-address 192.168.0.132
+
+
+
+----------------------------------------------->>HSRP
+----------------------------------------->> MSW1
+interface vlan 10
+ standby 10 ip 192.168.0.3
+ standby 10 priority 110
+ standby 10 preempt
+ exit
+
+interface vlan 30
+ standby 30 ip 192.168.0.115
+ standby 30 priority 110
+ standby 30 preempt
+ exit
+
+interface vlan 40
+ standby 40 ip 192.168.0.35
+ standby 40 priority 110
+ standby 40 preempt
+ exit
+
+interface vlan 50
+ standby 50 ip 192.168.0.99
+ standby 50 priority 110
+ standby 50 preempt
+ exit
+
+interface vlan 200
+ standby 200 ip 192.168.0.67
+ standby 200 priority 100
+ standby 200 preempt
+ exit
+
+interface vlan 20
+ standby 20 ip 192.168.0.83
+ standby 20 priority 100
+ standby 20 preempt
+ exit
+
+interface vlan 60
+ standby 60 ip 192.168.0.131
+ standby 60 priority 110
+ standby 60 preempt
+ exit
+
+interface vlan 70
+ standby 70 ip 192.168.0.150
+ standby 70 priority 100
+ standby 70 preempt
+ exit
+
+----------------------------------------->> MSW2
+interface vlan 200
+ standby 200 ip 192.168.0.67
+ standby 200 priority 110
+ standby 200 preempt
+ exit
+
+interface vlan 20
+ standby 20 ip 192.168.0.83
+ standby 20 priority 110
+ standby 20 preempt
+ exit
+
+interface vlan 10
+ standby 10 ip 192.168.0.3
+ standby 10 priority 100
+ standby 10 preempt
+ exit
+
+interface vlan 30
+ standby 30 ip 192.168.0.115
+ standby 30 priority 100
+ standby 30 preempt
+ exit
+
+interface vlan 40
+ standby 40 ip 192.168.0.35
+ standby 40 priority 100
+ standby 40 preempt
+ exit
+
+interface vlan 50
+ standby 50 ip 192.168.0.99
+ standby 50 priority 100
+ standby 50 preempt
+ exit
+
+interface vlan 60
+ standby 60 ip 192.168.0.131
+ standby 60 priority 100
+ standby 60 preempt
+ exit
+
+interface vlan 70
+ standby 70 ip 192.168.0.150
+ standby 70 priority 110
+ standby 70 preempt
+ exit
+
+
+----------------------------------------->>firewall
+interface port 1
+ ip address 192.168.2.2 255.255.255.252
+ nameif inside1
+ security-level 100
+ exit
+
+interface port 2
+ ip address 192.168.2.6 255.255.255.252
+ nameif inside2
+ security-level 100
+ exit
+
+interface gigabitEthernet 1/5
+ nameif outside
+ security-level 0
+ exit
+
+
+---------------------------------------------->>VPN
+ip local pool PoolVPN 192.168.3.100 192.168.3.150
+ip route 0.0.0.0 0.0.0.0 Serial0/0/1 
+
+aaa new-model
+aaa authentication login UserVPN local 
+aaa authorization network GroupVPN local
+username uservpn secret ciscovpn
+crypto isakmp policy 100
+ encr aes 256
+ authentication pre-share
+ group 5
+ lifetime 9000
+crypto isakmp client configuration group GroupVPN
+ key ciscogroupvpn
+ pool PoolVPN
+crypto ipsec transform-set SetVPN esp-aes esp-sha-hmac
+crypto dynamic-map DynamicVPN 100
+ set transform-set SetVPN 
+ reverse-route
+crypto map StaticMap client authentication list UserVPN
+crypto map StaticMap isakmp authorization list GroupVPN
+crypto map StaticMap client configuration address respond
+crypto map StaticMap 20 ipsec-isakmp dynamic DynamicVPN
+interface Serial0/0/1
+ crypto map StaticMap
+
+
+
+
+
+
+----------------------------------------->> OSPF
+router ospf 1
+network 192.168.0.0 0.0.0.31 area 0
+network 192.168.0.32 0.0.0.31 area 0
+network 192.168.0.64 0.0.0.15 area 0
+network 192.168.0.80 0.0.0.15 area 0
+network 192.168.0.96 0.0.0.15 area 0
+network 192.168.0.112 0.0.0.15 area 0
+network 192.168.0.128 0.0.0.15 area 0
+network 192.168.1.0 0.0.0.255 area 0
+network 192.168.2.4 0.0.0.3 area 0
+
+
+router ospf 1
+network 192.168.0.0 0.0.0.31 area 0
+network 192.168.0.32 0.0.0.31 area 0
+network 192.168.0.64 0.0.0.15 area 0
+network 192.168.0.80 0.0.0.15 area 0
+network 192.168.0.96 0.0.0.15 area 0
+network 192.168.0.112 0.0.0.15 area 0
+network 192.168.0.128 0.0.0.15 area 0
+network 192.168.1.0 0.0.0.255 area 0
+network 192.168.2.0 0.0.0.3 area 0
+
+
+
+
+
+----------------------------------------->> NAT
+interface g0/0
+ip nat inside
+exit
+interface serial 0/0/1
+ip nat outside
+exit
+access-list 1 permit 192.168.0.0 0.0.0.31
+access-list 1 permit 192.168.0.80 0.0.0.15
+access-list 1 permit 192.168.0.112 0.0.0.15
+access-list 1 permit 192.168.0.32 0.0.0.31
+access-list 1 permit 192.168.0.96 0.0.0.15
+access-list 1 permit 192.168.0.64 0.0.0.15
+access-list 1 permit 192.168.1.0 0.0.0.0
+access-list 1 permit 192.168.0.128 0.0.0.15
+ip nat inside source list 1 interface s0/0/1 overload
+
+
+------------------------------------------>> Firewall access-list
+
+access-list BLOCKED extended deny tcp any any eq telnet
+access-list BLOCKED extended deny tcp any any eq ftp
+access-list BLOCKED extended deny tcp any any eq www
+access-list BLOCKED extended permit icmp 192.168.3.0 255.255.255.0 any
+access-list BLOCKED extended permit icmp 192.168.2.8 255.255.255.252 any
+access-list BLOCKED extended deny icmp any any echo
+access-list BLOCKED extended permit ip any any
+access-group BLOCKED in interface outside
+
+
+
+---------------------------------------->> MSWs ACLs
+ip access-list extended BAN-GUESTS-VLAN
+deny tcp any any eq 23
+deny tcp any any eq 21
+deny tcp any any eq 80
+deny ip 192.168.1.0 0.0.0.255 192.168.0.144 0.0.0.15
+deny ip 192.168.1.0 0.0.0.255 192.168.0.128 0.0.0.15
+deny ip 192.168.1.0 0.0.0.255 192.168.0.112 0.0.0.15
+deny ip 192.168.1.0 0.0.0.255 192.168.0.96 0.0.0.15
+deny ip 192.168.1.0 0.0.0.255 192.168.0.80 0.0.0.15
+deny ip 192.168.1.0 0.0.0.255 192.168.0.64 0.0.0.15
+deny ip 192.168.1.0 0.0.0.255 192.168.0.32 0.0.0.31
+deny ip 192.168.1.0 0.0.0.255 192.168.0.0 0.0.0.31
+permit ip any any
+exit
+
+interface vlan 100
+ip access-group BAN-GUESTS-VLAN in
+exit
+
+ip access-list extended CONTROL_TRAFFIC
+deny tcp any any eq 23
+deny tcp any any eq 21
+deny tcp any any eq 80
+permit ip any any
+exit
+
+interface vlan 10
+ip access-group CONTROL_TRAFFIC in
+exit
+interface vlan 20
+ip access-group CONTROL_TRAFFIC in
+exit
+interface vlan 30
+ip access-group CONTROL_TRAFFIC in
+exit
+interface vlan 40
+ip access-group CONTROL_TRAFFIC in
+exit
+interface vlan 50
+ip access-group CONTROL_TRAFFIC in
+exit
+interface vlan 60
+ip access-group CONTROL_TRAFFIC in
+exit
+interface vlan 70
+ip access-group CONTROL_TRAFFIC in
+exit
+interface vlan 200
+ip access-group CONTROL_TRAFFIC in
+exit
+
+
